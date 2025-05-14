@@ -11,6 +11,7 @@ if __name__ == "__main__":
     main_window = MainWindow()
     main_window.show()
     
+    # Initialize presenter with model and view
     presenter = Presenter(None, main_window)
 
     sys.exit(app.exec())
