@@ -40,7 +40,7 @@ class Presenter(QObject):
         
     def init_camera_model(self):
         """Initialize camera model with default settings"""
-        from model.camera import CameraDevice, VideoRecorder
+        from app.model.camera import CameraDevice, VideoRecorder  # 修正導入路徑
         
         # Initialize camera device (default to Webcam)
         try:
@@ -49,7 +49,9 @@ class Presenter(QObject):
             # Update camera combo box
             self.view.camera_panel.camera_combo.clear()
             self.view.camera_panel.camera_combo.addItems(["Webcam", "RealSense"])
+            print("相機初始化成功")  # 除錯訊息
         except Exception as e:
+            print(f"相機初始化失敗: {str(e)}")  # 除錯訊息
             QMessageBox.critical(self.view, "錯誤", f"無法初始化相機: {str(e)}")
     
     def connect_ui_signals(self):
@@ -59,15 +61,19 @@ class Presenter(QObject):
         self.view.camera_panel.camera_combo.currentTextChanged.connect(self.switch_camera)
         self.view.camera_panel.resolution_combo.currentTextChanged.connect(self.change_resolution)
         self.view.camera_panel.save_video_btn.clicked.connect(self.toggle_recording)
+        print("UI 信號連接完成")  # 除錯訊息
         
     def toggle_camera(self):
         """Toggle camera on/off"""
         try:
             if self.view.camera_panel.open_camera_btn.text() == '開啟相機':
+                print("正在開啟相機...")  # 除錯訊息
                 self.start_camera()
             else:
+                print("正在關閉相機...")  # 除錯訊息
                 self.stop_camera()
         except Exception as e:
+            print(f"相機操作錯誤: {str(e)}")  # 除錯訊息
             QMessageBox.critical(self.view, "錯誤", f"相機操作失敗: {str(e)}")
     
     def start_camera(self):
@@ -78,6 +84,7 @@ class Presenter(QObject):
             self.view.camera_panel.open_camera_btn.setText('關閉相機')
             self.view.camera_panel.progress_bar.setFormat('相機已開啟')
             self.update_camera_status()
+            print("相機已開啟")  # 除錯訊息
     
     def stop_camera(self):
         """Stop camera and update UI"""
@@ -92,6 +99,7 @@ class Presenter(QObject):
         self.view.camera_panel.progress_bar.setFormat('就緒')
         self.view.image_viewer.update_view(None)
         self.update_camera_status()
+        print("相機已關閉")  # 除錯訊息
     
     def switch_camera(self, camera_type):
         """Switch between different camera types"""
@@ -107,7 +115,9 @@ class Presenter(QObject):
             if was_running:
                 self.timer.start(30)
             self.update_camera_status()
+            print(f"已切換到 {camera_type}")  # 除錯訊息
         except Exception as e:
+            print(f"切換相機錯誤: {str(e)}")  # 除錯訊息
             QMessageBox.critical(self.view, "錯誤", f"切換相機失敗: {str(e)}")
     
     def change_resolution(self, resolution_text):

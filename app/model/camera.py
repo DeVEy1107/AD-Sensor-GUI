@@ -1,6 +1,12 @@
 import cv2
 import numpy as np
-import pyrealsense2 as rs
+
+# 嘗試導入 pyrealsense2，如果失敗則設為 None
+try:
+    import pyrealsense2 as rs
+except ImportError:
+    rs = None
+    print("Warning: pyrealsense2 not installed. RealSense camera will not be available.")
 
 
 class WebcamCamera:
@@ -32,6 +38,9 @@ class WebcamCamera:
 
 class RealSenseCamera:
     def __init__(self, width=640, height=480, fps=30):
+        if rs is None:
+            raise ImportError("pyrealsense2 is not installed")
+        
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)
@@ -73,13 +82,17 @@ class RealSenseCamera:
 
 class CameraDevice:
     def __init__(self, camera_type="Webcam"):
-        self.camera_types = ["Webcam", "RealSense"]
+        # 動態設定可用的相機類型
+        self.camera_types = ["Webcam"]
+        if rs is not None:
+            self.camera_types.append("RealSense")
         
         # Initialize cameras lazily
         self.camera_devices = {
             "Webcam": None,
-            "RealSense": None
         }
+        if rs is not None:
+            self.camera_devices["RealSense"] = None
         
         self.camera_type = camera_type
         self.camera = None
@@ -87,7 +100,9 @@ class CameraDevice:
 
     def _initialize_camera(self, camera_type):
         if camera_type not in self.camera_types:
-            raise ValueError(f"Invalid camera type: {camera_type}")
+            # 如果指定的相機類型不可用，使用 Webcam
+            print(f"Camera type {camera_type} not available, using Webcam instead")
+            camera_type = "Webcam"
         
         # Create camera instance if not exists
         if self.camera_devices[camera_type] is None:
