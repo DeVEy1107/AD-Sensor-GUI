@@ -1,6 +1,7 @@
 # Architecture Overview
 
 
+<!-- .slide: data-background-color="white" -->
 ![](images/mvp_architecture_diagram.svg)
 
 
