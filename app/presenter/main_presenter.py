@@ -33,6 +33,8 @@ class Presenter(QObject):
         self.status_update_signal.connect(self.update_status_view)
         self.progress_update_signal.connect(self.update_progress_view)
         
+        print("Signals connected")
+        
         # Connect UI signals
         self.connect_ui_signals()
         
@@ -181,19 +183,39 @@ class Presenter(QObject):
             try:
                 frame = self.camera.get_frame()
                 if frame is not None:
+                    print(f"Got frame: {frame.shape}, dtype: {frame.dtype}")
+                    
                     # Convert BGR to RGB for display
                     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    print(f"Converted to RGB: {rgb_frame.shape}")
+                    
+                    # Ensure frame is contiguous
+                    if not rgb_frame.flags['C_CONTIGUOUS']:
+                        rgb_frame = np.ascontiguousarray(rgb_frame)
+                        print("Made frame contiguous")
+                    
+                    # Emit signal to update the display
                     self.image_update_signal.emit(rgb_frame)
                     
-                    # Record frame if recording
+                    # Record frame if recording (使用原始 BGR 格式)
                     if self.is_recording and self.video_recorder and self.video_recorder.is_recording:
                         self.video_recorder.record_frame(frame)
+                else:
+                    print("Frame is None from camera")
             except Exception as e:
                 print(f"更新畫面錯誤: {str(e)}")
+                import traceback
+                traceback.print_exc()
     
     def update_image_view(self, frame):
         """Update the image viewer with new frame"""
-        self.view.image_viewer.update_view(frame)
+        print("update_image_view called")
+        try:
+            self.view.image_viewer.update_view(frame)
+        except Exception as e:
+            print(f"Error in update_image_view: {e}")
+            import traceback
+            traceback.print_exc()
     
     def toggle_recording(self):
         """Toggle video recording"""
